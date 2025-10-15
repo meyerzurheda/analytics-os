@@ -1,5 +1,4 @@
 services:
-  # ---------- Storage (raw lake) ----------
   minio:
     image: minio/minio:latest
     command: server /data --console-address ":9001"
@@ -32,7 +31,6 @@ services:
       "
     restart: "no"
 
-  # ---------- Serving warehouse (marts) ----------
   postgres:
     image: postgres:16
     environment:
@@ -58,7 +56,6 @@ services:
       retries: 10
       start_period: 20s
 
-  # ---------- BI ----------
   metabase:
     image: metabase_duckdb:latest
     depends_on:
@@ -76,7 +73,6 @@ services:
       MB_DB_USER: ${POSTGRES_USER:-analytics}
       MB_DB_PASS: ${POSTGRES_PASSWORD:-analytics_pw}
       MB_DB_HOST: postgres
-      # Optional: reduce caching if your marts update frequently
       MB_EMBEDDING_APP_ORIGIN: "*"
       MB_API_KEY: "testkey"
     healthcheck:
@@ -86,8 +82,6 @@ services:
       retries: 10
       start_period: 30s
 
-  # ---------- Transforms ----------
-  # Runs dbt on DuckDB only, then restarts Metabase
   dbt:
     build: ./dbt
     working_dir: /usr/app
@@ -95,7 +89,6 @@ services:
       minio:
         condition: service_healthy
     environment:
-      # S3/MinIO creds for DuckDB HTTPFS/S3 access inside dbt models
       AWS_ACCESS_KEY_ID: ${MINIO_ROOT_USER:-minio}
       AWS_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD:-minio123}
       AWS_REGION: us-east-1
@@ -104,15 +97,6 @@ services:
     volumes:
       - ./dbt/analyticsOS:/usr/app
       - ./duckDB:/duckdb_output
-
-    # command: >
-    #   bash -lc "
-    #   pip install --no-cache-dir dbt-core dbt-duckdb &&
-    #   dbt deps --profiles-dir . &&
-    #   dbt run --profiles-dir . --target duckdb &&
-    #   cp /usr/app/warehouse.duckdb /duckdb_output/warehouse_new.db &&
-    #   echo 'dbt run complete, new warehouse ready at /duckdb_output/warehouse_new.db'
-    #   "
 
 volumes:
   minio-data:
