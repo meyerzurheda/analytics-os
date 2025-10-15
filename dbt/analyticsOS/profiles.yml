@@ -1,0 +1,24 @@
+analyticsOS:
+  target: duckdb
+  outputs:
+    duckdb:
+      type: duckdb
+      path: /usr/app/warehouse.duckdb
+      threads: 4
+      # Optional: access Parquet in MinIO via S3/HTTPFS inside models (e.g., read_parquet('s3://raw/...'))
+      extensions: ["httpfs", "parquet"]
+      settings:
+        s3_endpoint: "minio:9000"
+        s3_url_style: "path"
+        s3_use_ssl: false
+        s3_access_key_id: "{{ env_var('AWS_ACCESS_KEY_ID') }}"
+        s3_secret_access_key: "{{ env_var('AWS_SECRET_ACCESS_KEY') }}"
+    postgres:
+      type: postgres
+      host: "{{ env_var('DBT_PG_HOST') }}"
+      user: "{{ env_var('DBT_PG_USER') }}"
+      password: "{{ env_var('DBT_PG_PASSWORD') }}"
+      port: "{{ env_var('DBT_PG_PORT') | int }}"
+      dbname: "{{ env_var('DBT_PG_DBNAME') }}"
+      schema: marts
+      threads: 4

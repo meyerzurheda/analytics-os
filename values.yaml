@@ -1,0 +1,24 @@
+postgresql:
+  enabled: false
+
+global:
+  database:
+    type: external
+
+    # -- Secret name where database credentials are stored
+    secretName: "airbyte-config-secrets" # e.g. "airbyte-config-secrets"
+
+    # -- The database host
+    host: "host.lima.internal"
+
+    # -- The database port
+    port: "55432"
+
+    # -- The database name
+    name: "postgres"
+
+    # -- The key within `secretName` where database user is stored
+    userSecretKey: "database-user"
+
+    # -- The key within `secretName` where password is stored
+    passwordSecretKey: "database-password"

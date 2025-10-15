@@ -1,0 +1,2 @@
+CREATE DATABASE metabase;
+CREATE DATABASE analytics;

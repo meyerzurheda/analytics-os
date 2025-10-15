@@ -1,0 +1,128 @@
+services:
+  # ---------- Storage (raw lake) ----------
+  minio:
+    image: minio/minio:latest
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000"   # S3 API
+      - "9001:9001"   # Web console
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minio}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minio123}
+    volumes:
+      - minio-data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # Creates a 'raw' bucket in MinIO once at startup (idempotent)
+  minio-mc:
+    image: minio/mc:latest
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -lc "
+      mc alias set local http://minio:9000 ${MINIO_ROOT_USER:-minio} ${MINIO_ROOT_PASSWORD:-minio123} &&
+      mc mb -p local/raw || true &&
+      mc ls local
+      "
+    restart: "no"
+
+  # ---------- Serving warehouse (marts) ----------
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-analytics}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-analytics_pw}
+      POSTGRES_DB: postgres
+    ports:
+      - "55432:5432"
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+      - ./postgres-init/server.crt:/certs/server.crt:ro
+      - ./postgres-init/server.key:/certs/server.key:ro    
+      - ./postgres-init/pg_hba.conf:/etc/postgresql/pg_hba.conf:ro      
+      - ./postgres-init/postgresql.conf:/etc/postgresql/postgresql.conf:ro
+      - ./postgres-init/entrypoint.sh:/usr/local/bin/entrypoint.sh:ro
+      - ./postgres-init/init.sql:/docker-entrypoint-initdb.d/init.sql
+    entrypoint: ["/usr/local/bin/entrypoint.sh"] 
+    command: ["postgres", "-c", "config_file=/etc/postgresql/postgresql.conf"]      
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-analytics}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  # ---------- BI ----------
+  metabase:
+    image: metabase/metabase:latest
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "3030:3000"
+    environment:
+      # Use Postgres for Metabase's own application DB
+      MB_DB_TYPE: postgres
+      MB_DB_DBNAME: ${MB_APP_DB:-metabase}
+      MB_DB_PORT: 5432
+      MB_DB_USER: ${POSTGRES_USER:-analytics}
+      MB_DB_PASS: ${POSTGRES_PASSWORD:-analytics_pw}
+      MB_DB_HOST: postgres
+      # Optional: reduce caching if your marts update frequently
+      MB_EMBEDDING_APP_ORIGIN: "*"
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3030/api/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  # ---------- Transforms & publish ----------
+  # Runs dbt: builds staging/intermediate models in DuckDB,
+  # then publishes *marts* to Postgres (target=postgres).
+  dbt:
+    image: python:3.11-slim
+    working_dir: /usr/app
+    depends_on:
+      minio:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    environment:
+      # S3/MinIO creds for DuckDB HTTPFS/S3 access inside dbt models
+      AWS_ACCESS_KEY_ID: ${MINIO_ROOT_USER:-minio}
+      AWS_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD:-minio123}
+      AWS_REGION: us-east-1
+      S3_ENDPOINT: http://minio:9000
+      AWS_S3_ALLOW_UNSAFE_RENAME: "true"
+      # Postgres target (for dbt --target postgres)
+      DBT_PG_HOST: postgres
+      DBT_PG_PORT: "5432"
+      DBT_PG_USER: ${POSTGRES_USER:-analytics}
+      DBT_PG_PASSWORD: ${POSTGRES_PASSWORD:-analytics_pw}
+      DBT_PG_DBNAME: ${MARTS_DB:-analytics}
+    volumes:
+      - ./dbt/analyticsOS:/usr/app
+
+    # command: bash
+    # tty: true
+    # stdin_open: true
+
+    command: >
+      bash -lc "
+      pip install --no-cache-dir dbt-core dbt-duckdb dbt-postgres &&
+      dbt deps --profiles-dir . &&
+      dbt run --profiles-dir . --target duckdb --models staging &&
+      dbt run --profiles-dir . --target postgres --models marts
+      "
+    # Remove the command above if you plan to trigger dbt via cron/CI
+
+volumes:
+  minio-data:
+  pg-data:

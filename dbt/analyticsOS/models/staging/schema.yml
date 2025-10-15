@@ -1,0 +1,8 @@
+version: 2
+
+models:
+  - name: stg_sales_data
+    description: "Staging layer for sales data loaded from S3 parquet files"
+    config:
+      database: warehouse
+      schema: staging

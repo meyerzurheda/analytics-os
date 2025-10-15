@@ -1,0 +1,25 @@
+version: 2
+
+models:
+  - name: sales_summary
+    description: "Monthly sales summary by product category - stored in PostgreSQL"
+    config:
+      database: "{{ env_var('DBT_PG_DBNAME') }}"
+      schema: marts
+    columns:
+      - name: month
+        description: "Month of aggregation"
+      - name: product_category
+        description: "Product category"
+      - name: total_transactions
+        description: "Total number of sales transactions"
+      - name: total_revenue
+        description: "Total revenue for the month and category"
+      - name: avg_transaction_value
+        description: "Average transaction value"
+      - name: max_transaction
+        description: "Maximum transaction amount"
+      - name: min_transaction
+        description: "Minimum transaction amount"
+      - name: revenue_rank
+        description: "Rank by revenue within each month"
