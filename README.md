@@ -47,13 +47,26 @@ Select `Establish a read-only connection` and add `access_mode=read_only` to "Ad
 Running Airbyte via Docker is deprecated as Airbyte itself needs to spin up processes. Instead the recommended way to run it locally is via K8S. Airbyte provides a CLI tool for that `abctl` that sets up the cluster and installs all necessary resources.
 
 To let Airbyte use the Postgres database that is running via docker compose we need create a secret and patch the helm chart via `airbyte/values.yaml`.
-Adjust the database host depending on your docker runtime (`host.lima.internal` for Colima)
+To make sure kind uses a fixed gateway to the host we create the network by hand:
 
 ```
-abctl local install -v --secret airbyte/airbyte-secret --values airbyte/values.yaml
+docker network create --driver=bridge --subnet=172.25.0.0/16 --gateway=172.25.0.1 kind
+```
+
+and then install Airbyte with the given values.
+
+
+```
+abctl local install -v --secret airbyte/airbyte-secret --values airbyte/values.yaml --insecure-cookies
 ```
 
 Once deployed Airbyte is reachable at http://localhost:8000. 
+
+Get the initial password via
+
+```
+abctl local credentials
+```
 
 ### Add MinIO as a data destination
 
