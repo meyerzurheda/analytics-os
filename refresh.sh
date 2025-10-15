@@ -13,6 +13,13 @@ if [ -f duckDB/warehouse_new.db ]; then
     
     # Restart Metabase
     docker-compose restart metabase
+
+    sleep 10
+
+    curl http://localhost:3030/api/notify/db/3 \
+        --request POST \
+        --header 'Content-Type: application/json' \
+        --header 'X-Metabase-Apikey: testkey'
     
     echo "Done! Metabase restarted with fresh data."
 else

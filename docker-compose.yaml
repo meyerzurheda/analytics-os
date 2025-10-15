@@ -78,6 +78,7 @@ services:
       MB_DB_HOST: postgres
       # Optional: reduce caching if your marts update frequently
       MB_EMBEDDING_APP_ORIGIN: "*"
+      MB_API_KEY: "testkey"
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://localhost:3030/api/health"]
       interval: 15s
@@ -88,7 +89,7 @@ services:
   # ---------- Transforms ----------
   # Runs dbt on DuckDB only, then restarts Metabase
   dbt:
-    image: python:3.11-slim
+    build: ./dbt
     working_dir: /usr/app
     depends_on:
       minio:
@@ -104,14 +105,14 @@ services:
       - ./dbt/analyticsOS:/usr/app
       - ./duckDB:/duckdb_output
 
-    command: >
-      bash -lc "
-      pip install --no-cache-dir dbt-core dbt-duckdb &&
-      dbt deps --profiles-dir . &&
-      dbt run --profiles-dir . --target duckdb &&
-      cp /usr/app/warehouse.duckdb /duckdb_output/warehouse_new.db &&
-      echo 'dbt run complete, new warehouse ready at /duckdb_output/warehouse_new.db'
-      "
+    # command: >
+    #   bash -lc "
+    #   pip install --no-cache-dir dbt-core dbt-duckdb &&
+    #   dbt deps --profiles-dir . &&
+    #   dbt run --profiles-dir . --target duckdb &&
+    #   cp /usr/app/warehouse.duckdb /duckdb_output/warehouse_new.db &&
+    #   echo 'dbt run complete, new warehouse ready at /duckdb_output/warehouse_new.db'
+    #   "
 
 volumes:
   minio-data:
