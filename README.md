@@ -18,6 +18,8 @@ Additionally it uses Postgres to store configuration of Airbyte and Metabase.
 
 # Setup
 
+We need docker, make sure it has enough RAM available (e.g. 8GB).
+
 ## Transform, Load and Show
 
 Use docker compose to spin up all services:
@@ -48,3 +50,47 @@ Adjust the database host depending on your docker runtime (`host.lima.internal` 
 ```
 abctl local install -v --secret airbyte/airbyte-secret --values airbyte/values.yaml
 ```
+
+Once deployed Airbyte is reachable at http://localhost:8000. 
+
+### Add MinIO as a data destination
+
+Use these values to set up the destination
+
+```
+{
+  "name": "S3",
+  "configuration": {
+    "s3_bucket_region": "us-east-1",
+    "format": {
+      "format_type": "Parquet",
+      "page_size_kb": 1024,
+      "block_size_mb": 128,
+      "compression_codec": "UNCOMPRESSED",
+      "max_padding_size_mb": 8,
+      "dictionary_page_size_kb": 1024
+    },
+    "s3_endpoint": "http://host.lima.internal:9000",
+    "access_key_id": "minio",
+    "secret_access_key": "minio123"
+    "s3_bucket_name": "raw",
+    "s3_bucket_path": "/",
+  }
+}
+```
+
+To use the sample data for the example models add a file source targeting `https://onlinetestcase.com/wp-content/uploads/2023/06/200KB.csv`.
+
+# Modeling with DBT
+
+You can edit the DBT project in `dbt/analyticsOS`. Use the staging folder to load any external sources from the MinIO bucket. These are materialised as views in DuckDB, so cannot and should not be used in Metabase. 
+
+Instead build marts ontop of the staged data. These, in the `marts/` folder, are materialised as tables and are available in Metabase.
+
+To run DBT and update the models run 
+
+```
+./refresh
+```
+
+This will run the models and trigger a Metabase restart. This is necessary as Metabase keeps the DuckDB data in memory.
