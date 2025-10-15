@@ -1,23 +1,20 @@
 # Analytics OS
+  
+> Not all data is big data. 
 
-Not all data is big data. Most businesses struggle with analytics not because of the size of their data but because it is disjoined. What is needed is a simple way to bring all relevant data sets together, build models ontop of them and serve them in reports and dashboards to BI stakeholders. 
+
+Most businesses struggle with analytics not because of the size of their data but because it is disjoined. What is needed is a simple way to bring all relevant data sets together, build models ontop of them and serve them in reports and dashboards to BI stakeholders. 
+
+# Project Setup
 
 This projects spins up all necessary services to 
 
-- ingest data from different systems 
+- ingest data from different systems via Airbyte
 - store it in a local MinIO bucket
 - process and model it with DBT and duckDB
 - create dashboards on Metabase
 
-# Project Setup
-
-- Ingestion: Airbyte
-- Raw Data Storage: Minio (S3 compatible storage)
-- Processing: DBT
-- Analytical Data Storage: DuckDB
-- Visualisation: Metabase
-
-- Postgres to store configuration of Airbyte and Metabase
+Additionally it uses Postgres to store configuration of Airbyte and Metabase.
 
 # Setup
 
