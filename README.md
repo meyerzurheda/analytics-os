@@ -85,7 +85,7 @@ Use these values to set up the destination
       "max_padding_size_mb": 8,
       "dictionary_page_size_kb": 1024
     },
-    "s3_endpoint": "http://host.lima.internal:9000",
+    "s3_endpoint": "http://172.25.0.1:9000",
     "access_key_id": "minio",
     "secret_access_key": "minio123"
     "s3_bucket_name": "raw",
