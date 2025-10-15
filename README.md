@@ -9,10 +9,10 @@ Most businesses struggle with analytics not because of the size of their data bu
 
 This projects spins up all necessary services to 
 
-- ingest data from different systems via Airbyte
-- store it in a local MinIO bucket
-- process and model it with DBT and duckDB
-- create dashboards on Metabase
+- ingest data from different systems via **Airbyte**
+- store it in a local **MinIO** bucket
+- process and model it with **DBT** and **duckDB**
+- create dashboards on **Metabase**
 
 Additionally it uses Postgres to store configuration of Airbyte and Metabase.
 
