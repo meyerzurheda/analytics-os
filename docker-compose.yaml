@@ -60,12 +60,14 @@ services:
 
   # ---------- BI ----------
   metabase:
-    image: metabase/metabase:latest
+    image: metabase_duckdb:latest
     depends_on:
       postgres:
         condition: service_healthy
     ports:
       - "3030:3000"
+    volumes:
+      - ./duckDB/warehouse.db:/var/data/warehouse.db:ro
     environment:
       # Use Postgres for Metabase's own application DB
       MB_DB_TYPE: postgres
