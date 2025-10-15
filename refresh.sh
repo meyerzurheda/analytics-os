@@ -2,7 +2,7 @@
 
 # Run dbt
 echo "Running dbt..."
-docker-compose run --rm dbt
+docker compose run --rm dbt
 
 # Check if new database was created
 if [ -f duckDB/warehouse_new.db ]; then
@@ -12,7 +12,7 @@ if [ -f duckDB/warehouse_new.db ]; then
     mv duckDB/warehouse_new.db duckDB/warehouse.db
     
     # Restart Metabase
-    docker-compose restart metabase
+    docker compose restart metabase
 
     sleep 10
 
