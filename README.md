@@ -14,6 +14,8 @@ This projects spins up all necessary services to
 - process and model it with **DBT** and **duckDB**
 - create dashboards on **Metabase**
 
+![image](./docs/images/architecture.svg)
+
 Additionally it uses Postgres to store configuration of Airbyte and Metabase.
 
 # Setup
