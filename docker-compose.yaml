@@ -67,7 +67,7 @@ services:
     ports:
       - "3030:3000"
     volumes:
-      - ./duckDB/warehouse.db:/var/data/warehouse.db:ro
+      - ./duckDB:/var/data:ro,consistent
     environment:
       # Use Postgres for Metabase's own application DB
       MB_DB_TYPE: postgres
@@ -85,16 +85,13 @@ services:
       retries: 10
       start_period: 30s
 
-  # ---------- Transforms & publish ----------
-  # Runs dbt: builds staging/intermediate models in DuckDB,
-  # then publishes *marts* to Postgres (target=postgres).
+  # ---------- Transforms ----------
+  # Runs dbt on DuckDB only, then restarts Metabase
   dbt:
     image: python:3.11-slim
     working_dir: /usr/app
     depends_on:
       minio:
-        condition: service_healthy
-      postgres:
         condition: service_healthy
     environment:
       # S3/MinIO creds for DuckDB HTTPFS/S3 access inside dbt models
@@ -103,27 +100,18 @@ services:
       AWS_REGION: us-east-1
       S3_ENDPOINT: http://minio:9000
       AWS_S3_ALLOW_UNSAFE_RENAME: "true"
-      # Postgres target (for dbt --target postgres)
-      DBT_PG_HOST: postgres
-      DBT_PG_PORT: "5432"
-      DBT_PG_USER: ${POSTGRES_USER:-analytics}
-      DBT_PG_PASSWORD: ${POSTGRES_PASSWORD:-analytics_pw}
-      DBT_PG_DBNAME: ${MARTS_DB:-analytics}
     volumes:
       - ./dbt/analyticsOS:/usr/app
-
-    # command: bash
-    # tty: true
-    # stdin_open: true
+      - ./duckDB:/duckdb_output
 
     command: >
       bash -lc "
-      pip install --no-cache-dir dbt-core dbt-duckdb dbt-postgres &&
+      pip install --no-cache-dir dbt-core dbt-duckdb &&
       dbt deps --profiles-dir . &&
-      dbt run --profiles-dir . --target duckdb --models staging &&
-      dbt run --profiles-dir . --target postgres --models marts
+      dbt run --profiles-dir . --target duckdb &&
+      cp /usr/app/warehouse.duckdb /duckdb_output/warehouse_new.db &&
+      echo 'dbt run complete, new warehouse ready at /duckdb_output/warehouse_new.db'
       "
-    # Remove the command above if you plan to trigger dbt via cron/CI
 
 volumes:
   minio-data:
