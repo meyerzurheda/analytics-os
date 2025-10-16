@@ -1,0 +1,49 @@
+{
+	email {$EMAIL:no-reply@example.com}
+}
+
+metabase.localhost {
+	tls internal
+	encode zstd gzip
+	
+	reverse_proxy metabase:3000
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+		X-Content-Type-Options "nosniff"
+	}
+}
+
+airbyte.localhost {
+	tls internal
+	encode zstd gzip
+	
+	reverse_proxy host.docker.internal:8000
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+		X-Content-Type-Options "nosniff"
+	}
+}
+
+{$METABASE_DOMAIN:localhost:9999} {
+	encode zstd gzip
+	
+	reverse_proxy metabase:3000
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+		X-Content-Type-Options "nosniff"
+	}
+}
+
+{$AIRBYTE_DOMAIN:localhost:9998} {
+	encode zstd gzip
+	
+	reverse_proxy host.docker.internal:8000
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+		X-Content-Type-Options "nosniff"
+	}
+}
