@@ -118,7 +118,8 @@ services:
       - "443:443"
     environment:
       - EMAIL=${EMAIL}
-      - DOMAIN=${DOMAIN}
+      - AIRBYTE_DOMAIN=${AIRBYTE_DOMAIN}
+      - METABASE_DOMAIN=${METABASE_DOMAIN}
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data
