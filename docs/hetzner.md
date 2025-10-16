@@ -7,7 +7,7 @@ In this tutorial we will create a server and configure it so that it runs all ne
 I used a cx43 with 16Gb RAM and 160Gb of disk running Ubuntu. The monthly costs are ~10 euro. Add a ssh key during the setup and connect to the server with root
 
 ```
-ssh -l root <seriver-PI>
+ssh -l root <server-PI>
 ```
 
 🚨 **Remember to delete the server after the tutorial if you are not planning to keep on using it!**
