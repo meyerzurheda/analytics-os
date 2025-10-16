@@ -1,12 +1,29 @@
 # Analytics OS
   
-> Not all data is big data. 
+> Not all data is big data. Most teams struggle with *disjointed* data, not petabytes.
 
-> Don't pay for big data infrastructure if you don't need to
+**Analytics OS** is a batteries‑included modern data stack that runs for ≈$1/day,
+optimized for <100 GB analytical workloads, fast iteration, and simple ops.
 
 Most businesses struggle with analytics not because of the size of their data but because it is disjoined. What is needed is a simple way to bring all relevant data sets together, build models ontop of them and serve them in reports and dashboards to BI stakeholders. 
 
 Here we setup a whole analytics data lake with BI tooling that runs on <1$ a day.
+
+| Component | Example plan (Oct 2025) | Est. monthly |
+|-----------|--------------------------|--------------|
+| Compute   | Hetzner CX43 (shared vCPU) | €11–€12 |
+| Domain    | Any registrar             | €1–€2 (or 0€ if you already have one) |
+| SSL       | Let’s Encrypt via Caddy   | €0          |
+| Storage   | Local NVMe (MinIO on host)| included    |
+
+
+### Who is this for?
+- Early-stage startups and SMBs with < ~100 GB analytical data and a small BI team
+- Teams prioritizing cost, simplicity, and fast iteration over petabyte-scale throughput
+
+### Non-goals
+- Petabyte-scale warehousing or heavy concurrency
+- Complex governance/SOX workflows out of the box
 
 ## Disclaimer
 
