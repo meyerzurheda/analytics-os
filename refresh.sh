@@ -14,9 +14,11 @@ if [ -f duckDB/warehouse_new.db ]; then
     # Restart Metabase
     docker compose restart metabase
 
+    echo "Refreshing data ..."
+
     sleep 10
 
-    curl http://localhost:3030/api/notify/db/3 \
+    curl http://metabase.localhost/api/notify/db/2 \
         --request POST \
         --header 'Content-Type: application/json' \
         --header 'X-Metabase-Apikey: testkey'

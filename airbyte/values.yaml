@@ -4,21 +4,12 @@ postgresql:
 global:
   database:
     type: external
-
-    # -- Secret name where database credentials are stored
-    secretName: "airbyte-config-secrets" # e.g. "airbyte-config-secrets"
-
-    # -- The database host
-    host: "postgres"
-
-    # -- The database port
-    port: "5432"
-
-    # -- The database name
-    name: "postgres"
-
-    # -- The key within `secretName` where database user is stored
+    secretName: "airbyte-config-secrets"
     userSecretKey: "database-user"
-
-    # -- The key within `secretName` where password is stored
     passwordSecretKey: "database-password"
+    
+    # The hostname is resolved on the docker network "kind". It corresponds
+    # to the postgres service name in docker-compose.yaml
+    host: "postgres"
+    port: "5432"
+    name: "postgres" # database name
