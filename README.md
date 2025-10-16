@@ -49,3 +49,6 @@ Follow the [deployment tutorial](./docs/hetzner.md) for a server on Hetzner.
 
 This will take about 30 minutes and by the end you will have a complete pipeline running from an external source to a report on Metabase, all running online so you can start inviting other stakeholders to participate. 🎉
 
+
+## License
+[MIT](./LICENSE) © 2025 Clemens Meyer zu Rheda
