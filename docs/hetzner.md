@@ -199,3 +199,22 @@ Database File: `/var/data/warehouse.db`
 Check `Establish a read-only connection`.
 
 Under advanced options add `access_mode=read_only` to the additional DuckDB connection string options.
+
+Once the Database is connected we can use the table `data` to create a report:
+
+![image](./images/metabase-report.png)
+
+## Summary
+
+In this tutorial we created a complete data lakehouse analytics setup that can be extended straightforwardly.
+
+### Next steps
+
+This serves as a proof-of-concept on how to connect all necessary pieces. To use in day to day one could 
+
+- expose the MinIO UI to the reverse proxy so it can be accessed (really change the passwords before though)
+- run `./refresh` in a cronjob to keep models up to date
+- add a `git pull` to the cronjob so new model definitions are downloaded
+- expose the DBT docs for easy model browsing
+- add a persistent volume to the server for backup
+- etc. etc.
