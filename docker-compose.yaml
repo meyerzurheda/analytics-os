@@ -9,7 +9,7 @@ services:
   minio:
     image: minio/minio:latest
     command: server /data --console-address ":9001"
-    networks: [internal]
+    networks: [internal, kind]
     expose:
       - 9000
       - 9001
