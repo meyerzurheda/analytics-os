@@ -64,7 +64,7 @@ cd analytics-os
 We set the correct domain names in our `.env`
 
 ```
-cp .env.local .env
+cp .env.example .env
 vim .env
 ```
 
